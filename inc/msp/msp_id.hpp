@@ -77,6 +77,8 @@ enum class ID : uint8_t {
 
     MSP_VTX                       = 88,
 
+	MSP_STATUS_EX				  = 150,
+
     MSP_OSD_VIDEO_CONFIG          = 180,
     MSP_SET_OSD_VIDEO_CONFIG      = 181,
     MSP_OSD_VIDEO_STATUS          = 182,

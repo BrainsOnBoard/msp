@@ -4,6 +4,7 @@
 #include <future>
 #include <iostream>
 #include <type_traits>
+#include <xbeep.h>
 
 namespace msp {
 
@@ -14,6 +15,23 @@ MSP::MSP(const std::string &device, const size_t baudrate) : pimpl(new SerialPor
 }
 
 MSP::~MSP() { }
+
+#ifdef USE_XBEE
+
+// XBEE VERSION
+bool MSP::connect(const std::string &device, const size_t baudrate) {
+
+	std::cout << "we got here" << std::endl;
+
+	libxbee::XBee Zigbee(std::string("xbeeZB"), device, baudrate);
+	libxbee::Con mycon(Zigbee, std::string("Data"));
+	//Zigbee.conRegister(mycon);
+    //std::cout<<"Connected to: "<<device<<std::endl;
+    //return true;}
+	return true;
+}
+
+#else // USE_XBEE, End of XBEE version
 
 bool MSP::connect(const std::string &device, const size_t baudrate) {
     this->device = device;
@@ -35,6 +53,8 @@ bool MSP::connect(const std::string &device, const size_t baudrate) {
     std::cout<<"Connected to: "<<device<<std::endl;
     return true;
 }
+
+#endif // USE_XBEE
 
 bool MSP::request(msp::Request &request) {
     if(!sendData(request.id()))
@@ -255,6 +275,70 @@ uint8_t MSP::crc(const uint8_t id, const ByteVector &data) {
     return crc;
 }
 
+#ifdef USE_XBEE
+
+// XBEE VERSION
+bool MSP::write(const std::vector<uint8_t> &data) {
+    std::lock_guard<std::mutex> lock(lock_write);
+    try {
+        const std::size_t bytes_written = asio::write(pimpl->port, asio::buffer(data.data(), data.size()));
+        return (bytes_written==data.size());
+    }
+    catch(const asio::system_error &e) {
+        throw NoConnection(device, e.what());
+    }
+}
+
+// XBEE VERSION
+size_t MSP::read(std::vector<uint8_t> &data) {
+    std::lock_guard<std::mutex> lock(lock_read);
+    return asio::read(pimpl->port, asio::buffer(data.data(), data.size()));
+}
+
+// XBEE VERSION
+std::vector<uint8_t> MSP::read(std::size_t n_bytes) {
+    std::vector<uint8_t> data(n_bytes);
+    const size_t nread = read(data);
+    assert(nread==n_bytes);
+    return data;
+}
+
+// XBEE VERSION
+int MSP::hasData() {
+#if __unix__ || __APPLE__
+    int available_bytes;
+    if(ioctl(pimpl->port.native_handle(), FIONREAD, &available_bytes)!=-1) {
+        return available_bytes;
+    }
+    else {
+        return -1;
+    }
+#elif _WIN32
+    COMSTAT comstat;
+    if (ClearCommError(pimpl->port.native_handle(), NULL, &comstat) == true) {
+        return comstat.cbInQue;
+    }
+    else {
+        return -1;
+    }
+#else
+#warning "hasData() will be unimplemented"
+#endif
+}
+
+// XBEE VERSION
+void MSP::clear() {
+#if __unix__ || __APPLE__
+    tcflush(pimpl->port.native_handle(),TCIOFLUSH);
+#elif _WIN32
+    PurgeComm(pimpl->port.native_handle(), PURGE_TXCLEAR);
+#else
+#warning "clear() will be unimplemented"
+#endif
+}
+
+#else // USE_XBEE, End of Xbee version
+
 bool MSP::write(const std::vector<uint8_t> &data) {
     std::lock_guard<std::mutex> lock(lock_write);
     try {
@@ -309,5 +393,6 @@ void MSP::clear() {
 #warning "clear() will be unimplemented"
 #endif
 }
+#endif // USE_XBEE
 
 } // namespace msp

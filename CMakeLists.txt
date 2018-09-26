@@ -27,6 +27,7 @@ include_directories(${MSP_INCLUDE_DIR})
 # low-level API
 add_library(msp ${MSP_SOURCE_DIR}/MSP.cpp)
 target_link_libraries(msp ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(msp xbeep)
 
 # printing message content
 add_library(msp_msg_print ${MSP_SOURCE_DIR}/msg_print.cpp)
@@ -34,6 +35,7 @@ add_library(msp_msg_print ${MSP_SOURCE_DIR}/msg_print.cpp)
 # client library
 add_library(mspclient ${MSP_SOURCE_DIR}/Client.cpp)
 target_link_libraries(mspclient ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(mspclient xbeep)
 
 # high-level API
 add_library(msp_fcu ${MSP_SOURCE_DIR}/FlightController.cpp)
@@ -47,37 +49,38 @@ target_link_libraries(msp_fcu mspclient)
 add_executable(msp_connection_test examples/msp_connection_test.cpp)
 target_link_libraries(msp_connection_test msp)
 
+
 # test and print all requests
-add_executable(msp_read_test examples/msp_read_test.cpp)
-target_link_libraries(msp_read_test msp msp_msg_print)
+#add_executable(msp_read_test examples/msp_read_test.cpp)
+#target_link_libraries(msp_read_test xbee msp msp_msg_print)
 
 # testing publish/subscribe
-add_executable(fcu_test examples/fcu_test.cpp)
-target_link_libraries(fcu_test msp_fcu msp_msg_print)
+#add_executable(fcu_test examples/fcu_test.cpp)
+#target_link_libraries(fcu_test xbee msp_fcu msp_msg_print)
 
 # test arming and disarming
-add_executable(fcu_arm examples/fcu_arm_test.cpp)
-target_link_libraries(fcu_arm msp_fcu)
+#add_executable(fcu_arm examples/fcu_arm_test.cpp)
+#target_link_libraries(fcu_arm xbee msp_fcu)
 
 # test setting motors directly
-add_executable(fcu_motors examples/fcu_motor_test.cpp)
-target_link_libraries(fcu_motors msp_fcu)
+#add_executable(fcu_motors examples/fcu_motor_test.cpp)
+#target_link_libraries(fcu_motors xbee msp_fcu)
 
 # subscribing with custom type
-add_executable(fcu_custom_type examples/fcu_custom_type.cpp)
-target_link_libraries(fcu_custom_type msp_fcu)
+add_executable(betaflight_drone_test bob/betaflight_drone_test.cpp)
+target_link_libraries(betaflight_drone_test msp_fcu)
 
 # cleanflight requests
-add_executable(cleanflight_read_test examples/cleanflight_read_test.cpp)
-target_link_libraries(cleanflight_read_test msp msp_msg_print)
+#add_executable(cleanflight_read_test examples/cleanflight_read_test.cpp)
+#target_link_libraries(cleanflight_read_test xbee msp msp_msg_print)
 
 # client test for asynchronous callbacks
-add_executable(client_async_test examples/client_async_test.cpp)
-target_link_libraries(client_async_test mspclient msp_msg_print)
+#add_executable(client_async_test examples/client_async_test.cpp)
+#target_link_libraries(client_async_test xbee mspclient msp_msg_print)
 
 # client test for blocking read
-add_executable(client_read_test examples/client_read_test.cpp)
-target_link_libraries(client_read_test mspclient msp_msg_print)
+#add_executable(client_read_test examples/client_read_test.cpp)
+#target_link_libraries(client_read_test xbee mspclient msp_msg_print)
 
 
 ################################################################################
