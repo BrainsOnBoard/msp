@@ -67,8 +67,8 @@ target_link_libraries(msp_connection_test msp)
 #target_link_libraries(fcu_motors xbee msp_fcu)
 
 # subscribing with custom type
-add_executable(betaflight_drone_test bob/betaflight_drone_test.cpp)
-target_link_libraries(betaflight_drone_test msp_fcu)
+#add_executable(betaflight_drone_test bob/betaflight_drone_test.cpp)
+#target_link_libraries(betaflight_drone_test msp_fcu)
 
 # cleanflight requests
 #add_executable(cleanflight_read_test examples/cleanflight_read_test.cpp)

@@ -50,7 +50,7 @@ void PeriodicTimer::setPeriod(const double period_seconds) {
 namespace msp {
 namespace client {
 
-Client::Client() : pimpl(new SerialPortImpl), zigbee(new libxbee::XBee("xbeeZB")), running(false), print_warnings(false) {
+Client::Client() : pimpl(new SerialPortImpl), running(false), print_warnings(false) {
     request_received.data.reserve(256);
 }
 
@@ -62,17 +62,6 @@ Client::~Client() {
         delete s.second;
 }
 
-#ifdef USE_XBEE
-
-// XBEE VERSION
-void Client::connect(const std::string &device, const size_t baudrate) {
-
-	std::cout << "Using Xbee for communication" << std::endl;
-
-}
-
-#else
-
 void Client::connect(const std::string &device, const size_t baudrate) {
     pimpl->port.open(device);
 
@@ -83,7 +72,6 @@ void Client::connect(const std::string &device, const size_t baudrate) {
 }
 
 
-#endif
 
 void Client::start() {
     thread = std::thread([this]{
@@ -92,36 +80,6 @@ void Client::start() {
     });
 }
 
-#ifdef USE_XBEE
-
-// XBEE VERSION
-void Client::stop() {
-    running = false;
-    pimpl->io.stop();
-    pimpl->port.close();
-    thread.join();
-}
-
-// XBEE VERSION
-bool Client::sendData(const uint8_t id, const ByteVector &data) {
-    std::lock_guard<std::mutex> lock(mutex_send);
-
-    try {
-        asio::write(pimpl->port, asio::buffer("$M<",3));              // header
-        asio::write(pimpl->port, asio::buffer({uint8_t(data.size())})); // data size
-        asio::write(pimpl->port, asio::buffer({uint8_t(id)}));          // message id
-        asio::write(pimpl->port, asio::buffer(data));                   // data
-        asio::write(pimpl->port, asio::buffer({crc(id, data)}));        // crc
-    } catch (const asio::system_error &ec) {
-        if (ec.code() == asio::error::operation_aborted) {
-            //operation_aborted error probably means the client is being closed
-            return false;
-        }
-    }
-
-    return true;
-}
-#else // USE_XBEE
 void Client::stop() {
     running = false;
     pimpl->io.stop();
@@ -147,7 +105,6 @@ bool Client::sendData(const uint8_t id, const ByteVector &data) {
 
     return true;
 }
-#endif // USE_XBEE
 
 
 
@@ -220,78 +177,7 @@ uint8_t Client::crc(const uint8_t id, const ByteVector &data) {
     return crc;
 }
 
-#ifdef USE_XBEE
 
-// XBEE VERSION
-void Client::processOneMessage() {
-    uint8_t c;
-    // find start of header
-    while(true) {
-        // find '$'
-        for(c=0; c!='$'; asio::read(pimpl->port, asio::buffer(&c,1)));
-        // check 'M'
-        asio::read(pimpl->port, asio::buffer(&c,1));
-        if(c=='M') { break; }
-    }
-
-    // message direction
-    asio::read(pimpl->port, asio::buffer(&c,1));
-    const bool ok_id = (c!='!');
-
-    // payload length
-    uint8_t len;
-    asio::read(pimpl->port, asio::buffer(&len,1));
-    request_received.data.resize(len);
-
-    // message ID
-    mutex_request.lock();
-    asio::read(pimpl->port, asio::buffer(&request_received.id,1));
-    mutex_request.unlock();
-
-    if(print_warnings && !ok_id) {
-        std::cerr << "Message with ID " << size_t(request_received.id) << " is not recognised!" << std::endl;
-    }
-
-    // payload
-    asio::read(pimpl->port, asio::buffer(request_received.data));
-
-    // CRC
-    uint8_t rcv_crc;
-    asio::read(pimpl->port, asio::buffer(&rcv_crc,1));
-    mutex_request.lock();
-    const uint8_t exp_crc = crc(request_received.id, request_received.data);
-    mutex_request.unlock();
-    const bool ok_crc = (rcv_crc==exp_crc);
-
-    if(print_warnings && !ok_crc) {
-        std::cerr << "Message with ID " << size_t(request_received.id) << " has wrong CRC! (expected: " << size_t(exp_crc) << ", received: "<< size_t(rcv_crc) << ")" << std::endl;
-    }
-
-    mutex_request.lock();
-    request_received.status = !ok_id ? FAIL_ID : (!ok_crc ? FAIL_CRC : OK) ;
-    mutex_request.unlock();
-
-    // notify waiting request methods
-    cv_request.notify_one();
-    // notify waiting respond methods
-    cv_ack.notify_one();
-
-    // check subscriptions
-    mutex_callbacks.lock();
-    mutex_request.lock();
-    if(request_received.status==OK && subscriptions.count(ID(request_received.id))) {
-        // fetch message type, decode payload
-        msp::Request *const req = subscribed_requests.at(ID(request_received.id));
-        req->decode(request_received.data);
-        mutex_request.unlock();
-        // call callback
-        subscriptions.at(ID(request_received.id))->call(*req);
-    }
-    mutex_request.unlock();
-    mutex_callbacks.unlock();
-}
-
-#else
 
 void Client::processOneMessage() {
     uint8_t c;
@@ -361,7 +247,6 @@ void Client::processOneMessage() {
     mutex_callbacks.unlock();
 }
 
-#endif
 
 } // namespace client
 } // namespace msp

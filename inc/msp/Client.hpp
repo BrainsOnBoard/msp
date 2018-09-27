@@ -9,13 +9,6 @@
 #include <map>
 #include "types.hpp"
 
-#define USE_XBEE
-
-#ifdef USE_XBEE
-#include <xbee.h>
-#include <xbeep.h>
-#endif
-
 namespace msp {
 
 struct SerialPortImpl;
@@ -325,7 +318,6 @@ private:
 private:
     // I/O
     std::unique_ptr<SerialPortImpl> pimpl;
-	std::unique_ptr<libxbee::XBee> zigbee;
     // threading
     std::thread thread;
     bool running;

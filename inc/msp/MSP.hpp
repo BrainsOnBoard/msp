@@ -8,18 +8,6 @@
 #include <mutex>
 #include <memory>
 
-#define USE_XBEE
-#define LIBXBEE_BUILD
-
-#ifdef USE_XBEE
-#include <stdlib.h>
-#include <stdarg.h>
-#include <iostream>
-
-#include <xbee.h>
-#include <xbeep.h>
-#endif
-
 namespace msp {
 
 struct SerialPortImpl;
