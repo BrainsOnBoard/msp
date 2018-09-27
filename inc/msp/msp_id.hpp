@@ -77,8 +77,6 @@ enum class ID : uint8_t {
 
     MSP_VTX                       = 88,
 
-	MSP_STATUS_EX				  = 150,
-
     MSP_OSD_VIDEO_CONFIG          = 180,
     MSP_SET_OSD_VIDEO_CONFIG      = 181,
     MSP_OSD_VIDEO_STATUS          = 182,
@@ -109,6 +107,8 @@ enum class ID : uint8_t {
     MSP_SET_SERVO_MIX_RULE  = 242,
     MSP_SET_4WAY_IF         = 245,
 
+	MSP_ARMING_DISABLE = 99,
+
     // MultiWii
     MSP_IDENT       = 100,
     MSP_STATUS      = 101,
@@ -136,7 +136,8 @@ enum class ID : uint8_t {
     MSP_NAV_CONFIG  = 122,
 
     MSP_CELLS       = 130,
-
+	
+	MSP_STATUS_EX	= 150,
     MSP_SET_RAW_RC      = 200,
     MSP_SET_RAW_GPS     = 201,
     MSP_SET_PID         = 202,
