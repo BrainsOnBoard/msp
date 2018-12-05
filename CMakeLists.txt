@@ -27,7 +27,7 @@ include_directories(${MSP_INCLUDE_DIR})
 # low-level API
 add_library(msp ${MSP_SOURCE_DIR}/MSP.cpp)
 target_link_libraries(msp ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(msp xbeep)
+target_link_libraries(msp)
 
 # printing message content
 add_library(msp_msg_print ${MSP_SOURCE_DIR}/msg_print.cpp)
@@ -35,7 +35,7 @@ add_library(msp_msg_print ${MSP_SOURCE_DIR}/msg_print.cpp)
 # client library
 add_library(mspclient ${MSP_SOURCE_DIR}/Client.cpp)
 target_link_libraries(mspclient ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(mspclient xbeep)
+target_link_libraries(mspclient)
 
 # high-level API
 add_library(msp_fcu ${MSP_SOURCE_DIR}/FlightController.cpp)
