@@ -101,6 +101,8 @@ enum class ID : uint8_t {
     MSP_SET_PILOT            	= 222,
     MSP_PASSTHROUGH_SERIAL      = 244,
 
+    MSP_STATUS_EX 		= 150,
+
     MSP_UID                 = 160,
     MSP_GPSSVINFO           = 164,
     MSP_SERVO_MIX_RULES     = 241,

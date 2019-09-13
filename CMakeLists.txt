@@ -17,7 +17,7 @@ endif()
 find_package(Threads)
 
 set(MSP_SOURCE_DIR src)
-set(MSP_INCLUDE_DIR inc/msp)
+set(MSP_INCLUDE_DIR include/msp)
 include_directories(${MSP_INCLUDE_DIR})
 
 
